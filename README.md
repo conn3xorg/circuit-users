@@ -118,7 +118,7 @@ None.
 
 Rocky Linux 10, Fedora 45, Ubuntu 24.04 and Debian 13. CI applies [examples/local](examples/local) to each on amd64 and checks that the second plan has no changes.
 
-It was also applied by hand, with six other circuits, to an Ubuntu 24.04 droplet and a Rocky Linux 10 droplet with SELinux enforcing. On both, `alice` was in `developers` and listed by `sudo -l`, and `bob` had `/bin/sh` as his shell. After a reboot the plan had no changes and the audit log had no SELinux denials.
+It was also applied by hand, with six other circuits, to an Ubuntu 24.04 droplet and a Rocky Linux 10 droplet with SELinux enforcing. On both, `alice` was in `developers` and listed by `sudo -l`, and `bob` got `/bin/sh` as the login shell. After a reboot the plan had no changes and the audit log had no SELinux denials.
 
 ## License
 
