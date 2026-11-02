@@ -6,7 +6,7 @@ A [Conn3x](https://conn3x.org) circuit that manages local accounts from one map:
 
 ```hcl
 module "team" {
-  source = "github.com/conn3xorg/circuit-users?ref=v0.1.0"
+  source = "github.com/conn3xorg/circuit-users?ref=v0.1.1"
 
   hosts = {
     web1 = "203.0.113.10"
@@ -43,7 +43,7 @@ A value in `hosts` can also be a host object, as in a circuit's own [`hosts`](ht
 
 ```hcl
 module "team" {
-  source = "github.com/conn3xorg/circuit-users?ref=v0.1.0"
+  source = "github.com/conn3xorg/circuit-users?ref=v0.1.1"
 
   hosts = {
     for name, d in digitalocean_droplet.web : name => {
@@ -116,7 +116,7 @@ None.
 
 ## Tested on
 
-Rocky Linux 10, Fedora 45, Ubuntu 24.04 and Debian 13. CI applies [examples/local](examples/local) to each on amd64 and checks that the second plan has no changes.
+Rocky Linux 10, Fedora 45, Ubuntu 24.04 and Debian 13. CI applies [examples/local](examples/local) to each on amd64, checks that the second plan has no changes, logs in as a user with the key and uses sudo, and checks a user with no key and no sudo can do neither.
 
 It was also applied by hand, with six other circuits, to an Ubuntu 24.04 droplet and a Rocky Linux 10 droplet with SELinux enforcing. On both, `alice` was in `developers` and listed by `sudo -l`, and `bob` got `/bin/sh` as the login shell. After a reboot the plan had no changes and the audit log had no SELinux denials. The same checks passed on Fedora 44, with SELinux enforcing, and Debian 13 droplets, before and after a reboot.
 

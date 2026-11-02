@@ -59,6 +59,11 @@ jobs:
       - name: Install Conn3x
         env: *gh
         run: *install
+      # Ubuntu's AppArmor profile for unix_chkpwd also confines the one in a
+      # container, and doesn't grant the capability that reads Rocky's
+      # mode-0000 /etc/shadow, so sshd refuses every user but root there.
+      - name: Unload the runner's unix_chkpwd AppArmor profile
+        run: sudo apparmor_parser -R /etc/apparmor.d/unix-chkpwd
       - name: Start the ${{ matrix.distro }} host
         working-directory: examples/local
         env:
@@ -70,6 +75,16 @@ jobs:
           conn3x init
           conn3x apply -auto-approve
           conn3x plan -detailed-exitcode
+      # alice has the key and sudo. bob has neither, and neither should work.
+      - name: Log in with the key, and use sudo only as configured
+        working-directory: examples/local
+        run: |
+          login() { ssh -i id_ed25519 -p 2222 -o UserKnownHostsFile=known_hosts -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=10 "$1@127.0.0.1" "$2"; }
+          login alice true
+          [ "$(login alice 'sudo -n id -u')" = 0 ]
+          login alice 'id -nG' | grep -qw developers
+          if login bob true; then echo "bob has no key and logged in" >&2; exit 1; fi
+          if podman exec circuit-users su -s /bin/sh bob -c 'sudo -n true'; then echo "bob has no sudo and used it" >&2; exit 1; fi
       - name: Clean up
         if: always()
         working-directory: examples/local
