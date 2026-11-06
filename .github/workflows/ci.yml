@@ -78,13 +78,33 @@ jobs:
       # alice has the key and sudo. bob has neither, and neither should work.
       - name: Log in with the key, and use sudo only as configured
         working-directory: examples/local
-        run: |
+        run: &login |
           login() { ssh -i id_ed25519 -p 2222 -o UserKnownHostsFile=known_hosts -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=10 "$1@127.0.0.1" "$2"; }
           login alice true
           [ "$(login alice 'sudo -n id -u')" = 0 ]
           login alice 'id -nG' | grep -qw developers
           if login bob true; then echo "bob has no key and logged in" >&2; exit 1; fi
           if podman exec circuit-users su -s /bin/sh bob -c 'sudo -n true'; then echo "bob has no sudo and used it" >&2; exit 1; fi
+      # A fresh host gets the last release of this circuit, then this
+      # checkout is applied over it, the way someone moves the ?ref= pin.
+      - name: Upgrade from circuit-users v0.1.2 on a fresh host, then plan again with no changes
+        working-directory: examples/local
+        env:
+          CONTAINERFILE: ${{ github.workspace }}/conn3x/test/images/${{ matrix.distro }}/Containerfile
+        run: |
+          ./down.sh
+          ./up.sh
+          sed -i 's|source = "../.."|source = "github.com/conn3xorg/circuit-users?ref=v0.1.2"|' main.tf
+          grep -q 'ref=v0.1.2' main.tf
+          conn3x init
+          conn3x apply -auto-approve
+          git checkout -- main.tf
+          conn3x init
+          conn3x apply -auto-approve
+          conn3x plan -detailed-exitcode
+      - name: Log in with the key after the upgrade, and use sudo only as configured
+        working-directory: examples/local
+        run: *login
       - name: Clean up
         if: always()
         working-directory: examples/local
