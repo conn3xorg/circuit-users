@@ -57,8 +57,9 @@ circuit "users" {
   }
 
   # One drop-in per user, removed again when sudo is turned off. The content
-  # is built only from names the users variable has already checked, so it
-  # can't be a sudoers syntax error.
+  # is built only from names the users variable has already checked, and
+  # visudo checks it before it lands: a file sudo can't parse breaks sudo for
+  # everyone on the host. visudo comes with the sudo package installed above.
   step "sudoers" {
     for_each = local.sudoers
     file {
@@ -67,6 +68,7 @@ circuit "users" {
       mode      = "0440"
       owner     = "root"
       group     = "root"
+      validate  = "visudo -cf %s"
       on_remove = "delete"
     }
   }

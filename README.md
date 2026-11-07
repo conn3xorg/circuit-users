@@ -69,7 +69,7 @@ On every host in `hosts`, in this order:
 1. Creates every group that a user lists in `groups`. Groups that already exist, such as `wheel` or `sudo`, are left as they are.
 2. Creates each user, or brings an existing one in line with the attributes you set.
 3. Adds each key in `keys` to the user's `~/.ssh/authorized_keys`. Other keys in the file stay.
-4. For each user with `sudo = true`, installs sudo and writes `/etc/sudoers.d/NAME`, mode `0440`, with the line `NAME ALL=(ALL) NOPASSWD: ALL`.
+4. For each user with `sudo = true`, installs sudo and writes `/etc/sudoers.d/NAME`, mode `0440`, with the line `NAME ALL=(ALL) NOPASSWD: ALL`. `visudo -cf` checks each file before it lands, and one that fails stops the apply with nothing written, since a file sudo can't parse breaks sudo for everyone on the host.
 
 Removing things from the map:
 
@@ -78,7 +78,7 @@ Removing things from the map:
 - **A user** is no longer managed, but the account stays on the host. Delete it by hand, or with a `user` step with `on_remove = "delete"`.
 - **A group** that no user lists any more stays on the host.
 
-Conn3x has no way yet to check a file with `visudo` before writing it. The sudoers line is built only from the user's name, and the `users` variable rejects names that aren't valid login names, so the file can't hold a syntax error.
+The sudoers line is built only from the user's name, and the `users` variable rejects names that aren't valid login names, so the file shouldn't be able to hold a syntax error. The `visudo` check makes sure it can't.
 
 ## Inputs
 
@@ -113,7 +113,7 @@ None.
 
 ## Requirements
 
-- Conn3x v0.6.4 or later.
+- Conn3x v0.7.0 or later, for `file`'s `validate`.
 - Hosts running Rocky Linux, RHEL, AlmaLinux, Fedora, Debian or Ubuntu, with systemd.
 
 ## Tested on
