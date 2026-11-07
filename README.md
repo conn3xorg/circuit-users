@@ -8,7 +8,7 @@ A [Conn3x](https://conn3x.org) circuit that manages local accounts from one map:
 
 ```hcl
 module "team" {
-  source = "github.com/conn3xorg/circuit-users?ref=v0.1.3"
+  source = "github.com/conn3xorg/circuit-users?ref=v0.1.4"
 
   hosts = {
     web1 = "203.0.113.10"
@@ -45,7 +45,7 @@ A value in `hosts` can also be a host object, as in a circuit's own [`hosts`](ht
 
 ```hcl
 module "team" {
-  source = "github.com/conn3xorg/circuit-users?ref=v0.1.3"
+  source = "github.com/conn3xorg/circuit-users?ref=v0.1.4"
 
   hosts = {
     for name, d in digitalocean_droplet.web : name => {
